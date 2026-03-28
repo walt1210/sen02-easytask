@@ -28,16 +28,13 @@ export default function Home() {
 
   async function fetchTasks() {
     setIsLoading(true);
-    // Removed .order() to prevent the 'column created_at does not exist' error
     const { data, error } = await supabase
       .from('tasks')
-      .select('*');
+      .select('*')
+      .order('created_at', { ascending: false }); // Sorting is back!
 
-    if (error) {
-      console.error('Supabase Error:', error.message);
-    } else {
-      setTasks(data || []);
-    }
+    if (error) console.error('Error:', error.message);
+    else setTasks(data || []);
     setIsLoading(false);
   }
 
@@ -118,15 +115,27 @@ export default function Home() {
 
       <main className="main-content">
         <header className="topbar">
-          <div className="topbar-greeting">
-            <div className="day-label">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}</div>
-            <h1>Good morning, <span>Alex.</span></h1>
-              <div className="progress-container" style={{ width: '100%', height: '8px', background: 'var(--et-border)', borderRadius: '10px', marginTop: '10px' }}>
-                <div style={{ width: `${progress}%`, height: '100%', background: 'var(--et-green)', borderRadius: '10px', transition: 'width 0.4s ease' }}></div>
-              </div>
-              <p style={{ fontSize: '12px', marginTop: '5px', color: 'var(--et-muted)' }}>{progress}% of daily goals reached</p>
-
+        <div className="topbar-greeting">
+          <div className="day-label">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()}</div>
+          <h1>Good morning, <span>Alex.</span></h1>
+          
+          {/* NEW: Progress Bar */}
+          <div style={{ marginTop: '15px', maxWidth: '300px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '5px' }}>
+              <span>Daily Progress</span>
+              <span>{progress}%</span>
+            </div>
+            <div style={{ width: '100%', height: '6px', background: 'var(--et-border)', borderRadius: '10px' }}>
+              <div style={{ 
+                width: `${progress}%`, 
+                height: '100%', 
+                background: progress === 100 ? 'var(--et-green)' : 'var(--et-accent)', 
+                borderRadius: '10px', 
+                transition: 'width 0.5s ease-in-out' 
+              }}></div>
+            </div>
           </div>
+        </div>
           <button className="btn-add-task" onClick={() => setIsModalOpen(true)}>
             <i className="bi bi-plus-lg"></i> Add Task
           </button>
